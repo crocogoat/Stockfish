@@ -324,15 +324,14 @@ namespace {
             kingAdjacentZoneAttacksCount[Us] += popcount(b & attackedBy[Them][KING]);
         }
 
-        int mob = popcount(b & mobilityArea[Us]);
-
-        mobility[Us] += MobilityBonus[Pt - 2][mob];
-
         // Bonus for this piece as a king protector
         score += KingProtector[Pt - 2] * distance(s, pos.square<KING>(Us));
 
         if (Pt == BISHOP || Pt == KNIGHT)
         {
+            int mob = popcount(b & mobilityArea[Us]);
+            mobility[Us] += MobilityBonus[Pt - 2][mob];
+
             // Bonus for outpost squares
             bb = OutpostRanks & ~pe->pawn_attacks_span(Them);
             if (bb & s)
@@ -378,6 +377,9 @@ namespace {
 
         if (Pt == ROOK)
         {
+            int mob = popcount(b & mobilityArea[Us]);
+            mobility[Us] += MobilityBonus[Pt - 2][mob];
+
             // Bonus for aligning with enemy pawns on the same rank/file
             if (relative_rank(Us, s) >= RANK_5)
                 score += RookOnPawn * popcount(pos.pieces(Them, PAWN) & PseudoAttacks[ROOK][s]);
@@ -399,6 +401,9 @@ namespace {
 
         if (Pt == QUEEN)
         {
+            int mob = popcount(b & mobilityArea[Us] & ~attackedBy2[Them]);
+            mobility[Us] += MobilityBonus[Pt - 2][mob];
+
             // Penalty if any relative pin or discovered attack against the queen
             Bitboard pinners;
             if (pos.slider_blockers(pos.pieces(Them, ROOK, BISHOP), s, pinners))

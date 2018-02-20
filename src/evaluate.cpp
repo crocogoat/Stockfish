@@ -326,7 +326,7 @@ namespace {
         if (Pt == QUEEN)
             attackedBy[Us][QUEEN_DIAGONAL] |= b & PseudoAttacks[BISHOP][s];
 
-        if (b & kingRing[Them])
+        if (b & kingRing[Them] & ~attackedBy2[Them])
         {
             kingAttackersCount[Us]++;
             kingAttackersWeight[Us] += KingAttackWeights[Pt];
@@ -435,7 +435,7 @@ namespace {
     Score score = pe->king_safety<Us>(pos, ksq);
 
     // Main king safety evaluation
-    if (kingAttackersCount[Them] > (1 - pos.count<QUEEN>(Them)))
+    if (kingAttackersCount[Them] > 0)
     {
         // Attacked squares defended at most once by our queen or king
         weak =  attackedBy[Them][ALL_PIECES]

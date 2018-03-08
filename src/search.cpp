@@ -710,10 +710,11 @@ namespace {
         return eval;
 
     // Step 9. Null move search with verification search
-    if (   !PvNode
-        &&  eval >= beta
-        &&  ss->staticEval >= beta - 36 * depth / ONE_PLY + 225
-        && (ss->ply >= thisThread->nmp_ply || ss->ply % 2 != thisThread->nmp_odd))
+    if (    !PvNode
+        &&   eval >= beta
+        &&   ss->staticEval >= beta - 36 * depth / ONE_PLY + 225
+        &&  (ss->ply >= thisThread->nmp_ply || ss->ply % 2 != thisThread->nmp_odd)
+        && !(depth > (popcount(pos.pieces())) * ONE_PLY && (MoveList<LEGAL, KING>(pos).size() < 1)))
     {
         assert(eval - beta >= 0);
 

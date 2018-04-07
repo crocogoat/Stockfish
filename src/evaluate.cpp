@@ -166,6 +166,7 @@ namespace {
   constexpr Score CloseEnemies       = S(  7,  0);
   constexpr Score Connectivity       = S(  3,  1);
   constexpr Score CorneredBishop     = S( 50, 50);
+  constexpr Score DangerZone         = S( 10,  0);
   constexpr Score Hanging            = S( 52, 30);
   constexpr Score HinderPassedPawn   = S(  8,  1);
   constexpr Score KnightOnQueen      = S( 21, 11);
@@ -614,6 +615,9 @@ namespace {
        & attackedBy[Us][ALL_PIECES]   & ~attackedBy2[Us]
        & attackedBy[Them][ALL_PIECES] & ~attackedBy2[Them];
     score += Overload * popcount(b);
+
+    b = mobilityArea[Us] & attackedBy[Us][ALL_PIECES] & attackedBy2[Them] & ~attackedBy2[Us];
+    score -= DangerZone * popcount(b);
 
     if (T)
         Trace::add(THREAT, Us, score);

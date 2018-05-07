@@ -395,66 +395,69 @@ namespace {
     // King shelter and enemy pawns storm
     Score score = pe->king_safety<Us>(pos, ksq);
 
-    int kingDanger = 0;
-    unsafeChecks = 0;
+    if (kingRing[Us] & attackedBy[Them][ALL_PIECES])
+    {
+        int kingDanger = 0;
+        unsafeChecks = 0;
 
-    // Attacked squares defended at most once by our queen or king
-    weak =  attackedBy[Them][ALL_PIECES]
-          & ~attackedBy2[Us]
-          & (~attackedBy[Us][ALL_PIECES] | attackedBy[Us][KING] | attackedBy[Us][QUEEN]);
+        // Attacked squares defended at most once by our queen or king
+        weak =  attackedBy[Them][ALL_PIECES]
+              & ~attackedBy2[Us]
+              & (~attackedBy[Us][ALL_PIECES] | attackedBy[Us][KING] | attackedBy[Us][QUEEN]);
 
-    // Analyse the safe enemy's checks which are possible on next move
-    safe  = ~pos.pieces(Them);
-    safe &= ~attackedBy[Us][ALL_PIECES] | (weak & attackedBy2[Them]);
+        // Analyse the safe enemy's checks which are possible on next move
+        safe  = ~pos.pieces(Them);
+        safe &= ~attackedBy[Us][ALL_PIECES] | (weak & attackedBy2[Them]);
 
-    b1 = attacks_bb<ROOK  >(ksq, pos.pieces() ^ pos.pieces(Us, QUEEN));
-    b2 = attacks_bb<BISHOP>(ksq, pos.pieces() ^ pos.pieces(Us, QUEEN));
+        b1 = attacks_bb<ROOK  >(ksq, pos.pieces() ^ pos.pieces(Us, QUEEN));
+        b2 = attacks_bb<BISHOP>(ksq, pos.pieces() ^ pos.pieces(Us, QUEEN));
 
-    // Enemy queen safe checks
-    if ((b1 | b2) & attackedBy[Them][QUEEN] & safe & ~attackedBy[Us][QUEEN])
+        // Enemy queen safe checks
+        if ((b1 | b2) & attackedBy[Them][QUEEN] & safe & ~attackedBy[Us][QUEEN])
             kingDanger += QueenSafeCheck;
 
-    b1 &= attackedBy[Them][ROOK];
-    b2 &= attackedBy[Them][BISHOP];
+        b1 &= attackedBy[Them][ROOK];
+        b2 &= attackedBy[Them][BISHOP];
 
-    // Enemy rooks checks
-    if (b1 & safe)
-        kingDanger += RookSafeCheck;
-    else
-        unsafeChecks |= b1;
+        // Enemy rooks checks
+        if (b1 & safe)
+            kingDanger += RookSafeCheck;
+        else
+            unsafeChecks |= b1;
 
-    // Enemy bishops checks
-    if (b2 & safe)
-        kingDanger += BishopSafeCheck;
-    else
-        unsafeChecks |= b2;
+        // Enemy bishops checks
+        if (b2 & safe)
+            kingDanger += BishopSafeCheck;
+        else
+            unsafeChecks |= b2;
 
-    // Enemy knights checks
-    b = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
-    if (b & safe)
-        kingDanger += KnightSafeCheck;
-    else
-        unsafeChecks |= b;
+        // Enemy knights checks
+        b = pos.attacks_from<KNIGHT>(ksq) & attackedBy[Them][KNIGHT];
+        if (b & safe)
+            kingDanger += KnightSafeCheck;
+        else
+            unsafeChecks |= b;
 
-    // Unsafe or occupied checking squares will also be considered, as long as
-    // the square is in the attacker's mobility area.
-    unsafeChecks &= mobilityArea[Them];
-    pinned = pos.blockers_for_king(Us) & pos.pieces(Us);
-    Bitboard attacks1 = attackedBy[Them][ALL_PIECES] ^ attackedBy[Them][PAWN];
+        // Unsafe or occupied checking squares will also be considered, as long as
+        // the square is in the attacker's mobility area.
+        unsafeChecks &= mobilityArea[Them];
+        pinned = pos.blockers_for_king(Us) & pos.pieces(Us);
+        Bitboard attacks1 = attackedBy[Them][ALL_PIECES] ^ attackedBy[Them][PAWN];
 
-    kingDanger +=  110 * (popcount(attacks1 & kingRing[Us]) + popcount(attackedBy2[Them] & kingRing[Us]))
-                 + 191 * popcount(kingRing[Us] & weak)
-                 + 143 * popcount(pinned | unsafeChecks)
-                 - 848 * !pos.count<QUEEN>(Them)
-                 -   9 * mg_value(score) / 8
-                 +  40;
+        kingDanger +=  110 * (popcount(attacks1 & kingRing[Us]) + popcount(attackedBy2[Them] & kingRing[Us]))
+                     + 191 * popcount(kingRing[Us] & weak)
+                     + 143 * popcount(pinned | unsafeChecks)
+                     - 848 * !pos.count<QUEEN>(Them)
+                     -   9 * mg_value(score) / 8
+                     +  40;
 
-    // Transform the kingDanger units into a Score, and subtract it from the evaluation
-    if (kingDanger > 0)
-    {
-        int mobilityDanger = mg_value(mobility[Them] - mobility[Us]);
-        kingDanger = std::max(0, kingDanger + mobilityDanger);
-        score -= make_score(kingDanger * kingDanger / 4096, kingDanger / 16);
+        // Transform the kingDanger units into a Score, and subtract it from the evaluation
+        if (kingDanger > 0)
+        {
+            int mobilityDanger = mg_value(mobility[Them] - mobility[Us]);
+            kingDanger = std::max(0, kingDanger + mobilityDanger);
+            score -= make_score(kingDanger * kingDanger / 4096, kingDanger / 16);
+        }
     }
 
     Bitboard kf = KingFlank[file_of(ksq)];

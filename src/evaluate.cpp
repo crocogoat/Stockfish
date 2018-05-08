@@ -395,7 +395,7 @@ namespace {
     // King shelter and enemy pawns storm
     Score score = pe->king_safety<Us>(pos, ksq);
 
-    if (kingRing[Us] & attackedBy[Them][ALL_PIECES])
+    if (kingRing[Us])
     {
         int kingDanger = 0;
         unsafeChecks = 0;

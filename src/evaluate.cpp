@@ -454,13 +454,13 @@ namespace {
 
         // Enemy rooks checks
         if (b1 & safe)
-            kingDanger += RookSafeCheck + (RookSafeCheck * !kingMoves);
+            kingDanger += RookSafeCheck;
         else
             unsafeChecks |= b1;
 
         // Enemy bishops checks
         if (b2 & safe)
-            kingDanger += BishopSafeCheck + (BishopSafeCheck * !kingMoves);
+            kingDanger += BishopSafeCheck;
         else
             unsafeChecks |= b2;
 
